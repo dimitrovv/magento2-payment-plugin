@@ -1,0 +1,36 @@
+language: php
+
+sudo: true
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+matrix:
+  include:
+    - php: 5.6
+    - php: 7.0
+  allow_failures:
+    - php: 5.6
+    - php: 7.0
+
+before_install:
+  - composer selfupdate
+
+install:
+  - export COMPOSER_ROOT_VERSION=dev-master
+  - sudo apt-get remove libcurl4-gnutls-dev
+  - sudo apt-get install libcurl4-openssl-dev
+
+script:
+  composer create-project --repository-url=https://91e4b99d4358607dd8998c8c0b5d897a:f44dc2fbc2d64d7d5402b53f3cc4c41a@repo.magento.com/ magento/project-community-edition magento-root
+
+  mkdir -p magento-root/app/code/Dimitrovv/Module
+
+  cp -r !(magento-root) magento-root/app/code/Dimitrovv/Module/
+
+  rm -r !(magento-root)
+
+  cd magento-root
+
+  php vendor/phpunit/phpunit/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Dimitrovv/Module/
